@@ -1,12 +1,30 @@
-from django.shortcuts import render
-from .models import Course
-
-def course_details(request, course_id):
-    course = Course.objects.get(pk=course_id)
-    return render(request, 'onlinecourse/course_details_bootstrap.html', {'course': course})
+from django.shortcuts import render, redirect
+from .models import Course, Enrollment, Submission
 
 def submit(request):
+    if request.method == 'POST':
+        course_id = request.POST.get('course_id')
+        user = request.user
+
+        course = Course.objects.get(id=course_id)
+        enrollment = Enrollment.objects.get(user=user, course=course)
+
+        submission = Submission.objects.create(
+            enrollment=enrollment
+        )
+
+        return redirect('show_exam_result')
+
     return render(request, 'onlinecourse/result.html')
 
+
 def show_exam_result(request):
-    return render(request, 'onlinecourse/result.html')
+    total_score = 80
+    possible_score = 100
+
+    context = {
+        'total_score': total_score,
+        'possible_score': possible_score
+    }
+
+    return render(request, 'onlinecourse/result.html', context)
